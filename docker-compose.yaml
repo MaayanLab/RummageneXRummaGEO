@@ -1,0 +1,41 @@
+services:
+  rummagenexrummageo-app:
+    build: .
+    platform: linux/amd64
+    image: maayanlab/rummageogene
+    environment:
+      - PUBLIC_URL=$PUBLIC_URL
+      - DATABASE_URL=postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@rummagenexrummageo-postgres/$POSTGRES_DB
+      - AUTHORIZATION_HEADER=$AUTHORIZATION_HEADER
+      - NODE_ENV=production
+      - ENRICH_URL=$ENRICH_URL
+      - NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
+    ports:
+      - 3000:3000
+
+  rummagenexrummageo-enrich:
+    build: enrich
+    platform: linux/amd64
+    image: maayanlab/rummageogene-enrich
+    environment:
+      - 'ROCKET_DATABASES={postgres={url="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@rummagenexrummageo-postgres/${POSTGRES_DB}"}}'
+    ports:
+      - 8000:8000
+
+  rummagenexrummageo-postgres:
+    build: db
+    platform: linux/amd64
+    image: maayanlab/rummageogene-db
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - ENRICH_URL=$ENRICH_URL
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      
+
+volumes:
+  postgres_data:

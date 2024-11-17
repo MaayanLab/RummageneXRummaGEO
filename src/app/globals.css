@@ -1,0 +1,9 @@
+/* globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Styles */
+.table-thicker-rows td, .table-thicker-rows th {
+  border-bottom-width: 3px; /* Adjust the thickness here */
+}

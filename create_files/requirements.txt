@@ -1,0 +1,10 @@
+tqdm
+pandas
+requests
+git+https://github.com/Maayanlab/maayanlab-bioinformatics.git
+xmltodict
+biopython
+nltk
+jupyter
+statsmodels
+pyenrichr
