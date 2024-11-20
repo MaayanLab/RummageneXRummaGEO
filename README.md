@@ -58,3 +58,6 @@ PYTHONPATH=populate_db python3 -m helper update-background
 ### Writing Queries
 See `src/graphql/core.graphql`
 These can be tested/developed at <http://localhost:3000/graphiql>
+
+### Recreating files
+Check the create_files directory
