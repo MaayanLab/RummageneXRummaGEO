@@ -17,6 +17,7 @@ cd data
 curl -O https://rummagene.com/latest.gmt   #rummagene.gmt
 curl -O https://s3.amazonaws.com/maayanlab-public/rummageo/human-geo-auto.gmt.gz
 curl -O https://s3.amazonaws.com/maayanlab-public/rummageo/mouse-geo-auto.gmt.gz
+cd ..
 jupyter nbconvert --to notebook --inplace --execute rummageogene.ipynb #to create rummagenexrummageo.csv.gz
 jupyter nbconvert --to notebook --inplace --execute cleaning_up_csv.ipynb # to remove cases where the rummagene and rummageo share pmids
 ```
