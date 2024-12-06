@@ -1,6 +1,7 @@
 Mammalia/
 geo/
-figures/
+GEO/
+
 
 
 myvenv
@@ -47,9 +48,8 @@ next-env.d.ts
 
 
 #added
-db.dump
-delete/
-bot/
 data/
 !.env.example
 .env
+data/
+
