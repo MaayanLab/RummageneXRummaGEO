@@ -81,11 +81,11 @@ export default function RootLayout({
             <footer className="flex-none footer p-5 mt-5 bg-neutral text-neutral-content flex place-content-evenly">
               <div className="text-center pt-5">
                 <ul>
-                  {/* <li><Link href="mailto:avi.maayan@mssm.edu" target="_blank">Contact Us</Link></li> */}
+                  <li><Link href="mailto:avi.maayan@mssm.edu" target="_blank">Contact Us</Link></li>
                   <li>
-                    {/* <Link href="https://github.com/MaayanLab/rummagenexrummageo" target="_blank" rel="noopener noreferrer">
+                    <Link href="https://github.com/MaayanLab/RummageneXRummaGEO" target="_blank" rel="noopener noreferrer">
                       Source Code
-                    </Link> */}
+                    </Link>
                   </li>
                 </ul>
               </div>

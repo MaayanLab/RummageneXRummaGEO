@@ -21,6 +21,7 @@ def write_to_csv(df, file_path):
     df.to_csv(file_path, mode='a', header=is_file_empty(file_path), index=False)
 
 def preprop_GMTs(gmt, name):
+    """takes gmt file name and name of output csv filename, and performs harmonization on the genes to create a csv with cleaned genes"""
     with open(f"{name}.csv", 'w', newline='') as csvfile:
         fieldnames = ['identifier', 'desc', 'genes']
         writer = DictWriter(csvfile, fieldnames=fieldnames)
@@ -46,6 +47,7 @@ def preprop_GMTs(gmt, name):
 
 
 def cross_GMTs(main_dict, desc_dict, crossSets, name, record):
+    "takes a dictionary (of rummagene )"
     fish = FastFisher(23000)
     if len(main_dict) == 0:
         return 
