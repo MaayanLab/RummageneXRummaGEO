@@ -24,9 +24,9 @@ export default function HomeLayout({ children }: React.PropsWithChildren<{}>) {
             <span className="whitespace-nowrap">Rummage through the top <Stats bold show_unique_term/> </span>
           </h1>
           <div>
-            <span className="whitespace-nowrap"> by p value and odds ratio from crossing the gene sets from Rummagene and RummaGEO. Gene set pairs are sorted by the level of overlap </span>
+            <span className="whitespace-nowrap">  from crossing the gene sets from Rummagene and RummaGEO. Gene set pairs are sorted by p value </span>
             <h1>
-            <span className="whitespace-nowrap"> computed with the Fisher's exact test. To create the RummagenexRummaGEO database,  </span>
+            <span className="whitespace-nowrap"> and odds ratio of overlaps computed with the Fisher's exact test. To create the RummagenexRummaGEO database,  </span>
           </h1>
           <span className="whitespace-nowrap"> we crossed 748,220 Rummagene sets with 170,612 human RummaGEO sets and 193,939 mouse RummaGEO sets</span>
                   <p> to find the most similar gene sets that match your query.</p>
