@@ -52,4 +52,12 @@ data/
 !.env.example
 .env
 data/
+create_files/crossing_copy.py
+create_files/rummageogene_copy.ipynb
+create_files/rummageogene_h.ipynb
+create_files/rummageogene_rummageo_first.ipynb
+
+
+
+
 

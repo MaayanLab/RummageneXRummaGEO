@@ -47,37 +47,80 @@ def preprop_GMTs(gmt, name):
 
 
 def cross_GMTs(main_dict, desc_dict, crossSets, name, record):
-    "takes a dictionary (of rummagene )"
-    fish = FastFisher(23000)
+    """takes a dictionary(main_dict) mapped rummagene identifiers to genes and another which maps rummagene identifiers to table description and crosses with entire rummageo library (crossSets which maps rummageo identifiers to their genes).
+    Records the rummagene identifiers to avoid rerunning and stores results in output csv
+    """
     if len(main_dict) == 0:
         return 
-    fisher_dict = fisher(main_dict, crossSets, uppercase=False, min_overlap=5, fisher=fish)
-    fisher_result = pd.DataFrame()
+    fisher_dict = fisher(main_dict, crossSets, uppercase=False, min_overlap=5)
+    results = [] 
     for rummagene in tqdm(fisher_dict, desc="Processing Fisher results"):
         df = fisher_dict[rummagene]
-        df["rummagene"] = [rummagene for ele in range(len(df))]
-        df['rummagene-size'] = [len(main_dict[rummagene]) for ele in range(len(df))]
+        df["rummagene"] = rummagene
+        df['rummagene-size'] = len(main_dict[rummagene])
         df = df.rename(columns={"term": "rummageo", "set-size": "rummageo-size", "overlap":"n-overlap"})
         df = df.loc[df['p-value'] <= 0.001]
         df.sort_values(by=["p-value", "odds"], ascending=[True, False], inplace=True)
         df = df.head(10)
-        fisher_result = pd.concat([fisher_result, df], ignore_index=True)
-    fisher_result["overlaps"] = fisher_result.apply(lambda row: ";".join(main_dict[row["rummagene"]] & crossSets[row["rummageo"]]), axis=1)
-    fisher_result["rummagene-desc"] = fisher_result.apply(lambda row: desc_dict[row["rummagene"]], axis=1)
+        results.append(df)
+    if not results:  # If no results found
+        with open(record, 'a') as file:
+            file.writelines(f"{rummagene}\n" for rummagene in main_dict.keys())
+        print("None found")
+        return
+    fisher_result = pd.concat(results, ignore_index=True)
+    overlaps = []
+    for index, row in fisher_result.iterrows():
+        overlaps.append(";".join(main_dict[row["rummagene"]] & crossSets[row["rummageo"]]))
+    fisher_result["overlaps"] = overlaps
+    fisher_result["rummagene-desc"] = fisher_result["rummagene"].map(desc_dict)
     fisher_result.sort_values(by=["p-value", "odds"], ascending=[True, False],inplace=True)
     fisher_result.index = np.arange(1, len(fisher_result.index)+1)
-
-
-    rummagene = set(main_dict.keys())
-    for ele in rummagene:
-        with open(record, 'a') as file:
-            file.write(f"{ele}\n")  
-    if len(fisher_result) == 0:
-        return
-
     fisher_result = fisher_result[['rummagene', 'rummageo', 'rummagene-desc', 'p-value', 'sidak', 'fdr', 'odds', 'n-overlap', 'rummagene-size', 'rummageo-size','overlaps']]
     write_to_csv(fisher_result, f"{name}.csv")
+    with open(record, 'a') as file:
+        file.writelines(f"{rummagene}\n" for rummagene in main_dict.keys())
     return 
+
+
+
+def cross_GMTs_rummageo_first(main_dict, desc_dict, crossSets, name, record):
+    """takes a dictionary(main_dict) mapped rummagene identifiers to genes and another which maps rummagene identifiers to table description and crosses with entire rummageo library (crossSets which maps rummageo identifiers to their genes).
+    Records the rummagene identifiers to avoid rerunning and stores results in output csv
+    """
+    if len(main_dict) == 0:
+        return 
+    fisher_dict = fisher(main_dict, crossSets, uppercase=False, min_overlap=5)
+    results = [] 
+    for rummageo in tqdm(fisher_dict, desc="Processing Fisher results"):
+        df = fisher_dict[rummageo]
+        df["rummageo"] = rummageo
+        df['rummageo-size'] = len(main_dict[rummageo])
+        df = df.rename(columns={"term": "rummagene", "set-size": "rummagene-size", "overlap":"n-overlap"})
+        df = df.loc[df['p-value'] <= 0.001]
+        df.sort_values(by=["p-value", "odds"], ascending=[True, False], inplace=True)
+        df = df.head(10)
+        results.append(df)
+    if not results:  # If no results found
+        with open(record, 'a') as file:
+            file.writelines(f"{rummageo}\n" for rummageo in main_dict.keys())
+        print("None found")
+        return
+    fisher_result = pd.concat(results, ignore_index=True)
+    overlaps = []
+    for index, row in fisher_result.iterrows():
+        overlaps.append(";".join(main_dict[row["rummageo"]] & crossSets[row["rummagene"]]))
+    fisher_result["overlaps"] = overlaps
+    fisher_result["rummagene-desc"] = fisher_result["rummagene"].map(desc_dict)
+    fisher_result.sort_values(by=["p-value", "odds"], ascending=[True, False],inplace=True)
+    fisher_result.index = np.arange(1, len(fisher_result.index)+1)
+    fisher_result = fisher_result[['rummageo', 'rummagene', 'rummagene-desc', 'p-value', 'sidak', 'fdr', 'odds', 'n-overlap', 'rummagene-size', 'rummageo-size','overlaps']]
+    write_to_csv(fisher_result, f"{name}.csv")
+    with open(record, 'a') as file:
+        file.writelines(f"{rummageo}\n" for rummageo in main_dict.keys())
+    return 
+
+
 
 
 
