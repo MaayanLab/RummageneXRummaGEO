@@ -124,11 +124,15 @@ CREATE TABLE app_public_v2.gene_set (
     species character varying NOT NULL,
     gse character varying,
     pmc character varying,
-    hypothesis character varying,
+    hypothesis_title character varying,
+    hypothesis text,
     pvalue double precision,
     rummagene_size integer,
     rummageo_size integer,
-    odds double precision
+    odds double precision,
+    enrich_links character varying,
+    hypothesis_rating double precision DEFAULT 0,
+    rating_counts integer DEFAULT 0
 );
 
 
@@ -139,23 +143,13 @@ CREATE TABLE app_public_v2.gene_set (
 CREATE MATERIALIZED VIEW app_public_v2.ranked_gene_sets AS
  SELECT gene_set.id,
     gene_set.term,
-    gene_set.gene_ids,
-    gene_set.n_gene_ids,
-    gene_set.created,
-    gene_set.hash,
-    gene_set.description,
     gene_set.species,
-    gene_set.gse,
-    gene_set.pmc,
     gene_set.hypothesis,
-    gene_set.pvalue,
-    gene_set.rummagene_size,
-    gene_set.rummageo_size,
-    gene_set.odds,
+    gene_set.hypothesis_title,
     row_number() OVER (ORDER BY gene_set.pvalue, gene_set.odds DESC) AS rank
    FROM app_public_v2.gene_set
+  WHERE (gene_set.hypothesis IS NOT NULL)
   ORDER BY gene_set.pvalue, gene_set.odds DESC
- LIMIT 1000
   WITH NO DATA;
 
 
@@ -519,10 +513,10 @@ $$;
 
 
 --
--- Name: get_paginated_ranked_gene_sets2(integer, integer, character varying, boolean, character varying); Type: FUNCTION; Schema: app_public_v2; Owner: -
+-- Name: get_paginated_ranked_gene_sets(integer, integer, character varying, boolean, character varying); Type: FUNCTION; Schema: app_public_v2; Owner: -
 --
 
-CREATE FUNCTION app_public_v2.get_paginated_ranked_gene_sets2(p_limit integer, p_offset integer, p_term character varying DEFAULT NULL::character varying, p_case_sensitive boolean DEFAULT false, p_species character varying DEFAULT NULL::character varying) RETURNS app_public_v2.paginated_ranked_gene_sets_result
+CREATE FUNCTION app_public_v2.get_paginated_ranked_gene_sets(p_limit integer, p_offset integer, p_term character varying DEFAULT NULL::character varying, p_case_sensitive boolean DEFAULT false, p_species character varying DEFAULT NULL::character varying) RETURNS app_public_v2.paginated_ranked_gene_sets_result
     LANGUAGE plpgsql IMMUTABLE STRICT PARALLEL SAFE
     AS $$
 declare
@@ -543,7 +537,14 @@ begin
     and (p_species is null or p_species = '' or lower(species) = lower(p_species));
 
   select array(
-    select row(id, term, gene_ids, n_gene_ids, created, hash, description, species, gse, pmc, hypothesis, pvalue, rummagene_size, rummageo_size, odds, rank)
+    select row(
+    id,
+    term,
+    species,
+    hypothesis,
+    hypothesis_title,
+    rank
+)
     from app_public_v2.ranked_gene_sets
     where
       (p_term is null or p_term = '' or
@@ -774,6 +775,39 @@ begin
     if not found then
         raise exception 'Gene set with ID % not found', p_id;
     end if;
+end;
+$$;
+
+
+--
+-- Name: update_ratings(uuid, double precision); Type: FUNCTION; Schema: app_public_v2; Owner: -
+--
+
+CREATE FUNCTION app_public_v2.update_ratings(p_id uuid, p_rating double precision) RETURNS app_public_v2.gene_set
+    LANGUAGE plpgsql
+    AS $$
+declare
+    current_rating double precision;
+    current_count int;
+    new_rating double precision;
+begin
+    select hypothesis_rating, rating_counts
+    into current_rating, current_count
+    from app_public_v2.gene_set
+    where id = p_id;
+
+    if not found then
+        raise exception 'Gene set with ID % not found', p_id;
+    end if;
+    new_rating := ((current_rating * current_count) + p_rating) / (current_count + 1);
+    update app_public_v2.gene_set
+    set
+        hypothesis_rating = new_rating,
+        rating_counts = rating_counts + 1
+    where id = p_id;
+    return (
+        select * from app_public_v2.gene_set where id = p_id
+    );
 end;
 $$;
 

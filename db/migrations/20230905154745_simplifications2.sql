@@ -1,5 +1,4 @@
 --migrate:up
--- Define a custom type for storing enrichment results.
 create type app_public_v2.enrich_result as (
   gene_set_hash uuid,
   n_overlap int,
@@ -9,7 +8,6 @@ create type app_public_v2.enrich_result as (
 );
 comment on type app_public_v2.enrich_result is E'@foreign key (gene_set_hash) references app_public_v2.gene_set (hash)';
 
--- Function to retrieve gene sets related to a given enrichment result.
 create or replace function app_public_v2.enrich_result_gene_sets(enrich_result app_public_v2.enrich_result) returns setof app_public_v2.gene_set
 as $$
   select gs.*
@@ -18,7 +16,6 @@ as $$
 $$ language sql immutable strict;
 grant execute on function app_public_v2.enrich_result_gene_sets to guest, authenticated;
 
--- Function to retrieve genes associated with a specific gene set.
 create or replace function app_public_v2.gene_set_genes(gene_set app_public_v2.gene_set)
 returns setof app_public_v2.gene as
 $$
@@ -29,7 +26,6 @@ $$
 $$ language sql immutable strict parallel safe;
 grant execute on function app_public_v2.gene_set_genes to guest, authenticated;
 
--- Function to find overlapping genes between a gene set and a provided list of genes.
 create or replace function app_public_v2.gene_set_overlap(
   gene_set app_public_v2.gene_set,
   genes varchar[]
@@ -42,7 +38,6 @@ as $$
 $$ language sql immutable strict;
 grant execute on function app_public_v2.gene_set_overlap to guest, authenticated;
 
--- Table to store user-defined gene sets, including gene IDs and descriptions.
 create table app_public_v2.user_gene_set (
   id uuid primary key default uuid_generate_v4(),
   genes varchar[],
@@ -52,7 +47,6 @@ create table app_public_v2.user_gene_set (
 grant select on table app_public_v2.user_gene_set to guest;
 grant all privileges on table app_public_v2.user_gene_set to authenticated;
 
--- Function to add a new user-defined gene set to the database.
 create or replace function app_public_v2.add_user_gene_set(
   genes varchar[],
   description varchar default ''
@@ -69,7 +63,6 @@ as $$
 $$ language sql security definer;
 grant execute on function app_public_v2.add_user_gene_set to guest, authenticated;
 
--- Function to search for gene sets based on specified terms.
 create or replace function app_public_v2.gene_set_term_search(terms varchar[]) returns setof app_public_v2.gene_set
 as $$
   select distinct gs.*
@@ -78,7 +71,6 @@ as $$
 $$ language sql immutable strict parallel safe;
 grant execute on function app_public_v2.gene_set_term_search to guest, authenticated;
 
--- Function to search for gene sets containing specified genes.
 create or replace function app_public_v2.gene_set_gene_search(genes varchar[]) returns setof app_public_v2.gene_set
 as $$
   select distinct gs.*
@@ -88,32 +80,21 @@ as $$
 $$ language sql immutable strict parallel safe;
 grant execute on function app_public_v2.gene_set_gene_search to guest, authenticated;
 
--- Materialized view to store unique PMC values extracted from gene sets.
 create materialized view app_public_v2.gene_set_pmc as
 select distinct pmc
 from app_public_v2.gene_set;
--- comment on materialized view app_public_v2.gene_set_pmc is E'@foreignKey (id) references app_public_v2.gene_set (id)';
-
--- Create a unique index on the 'pmc' column for efficient querying.
 create unique index gene_set_pmc_id_pmc_idx on app_public_v2.gene_set_pmc (pmc);
-
--- Create a unique index on the 'pmc' column to ensure no duplicates.
 create unique index gene_set_pmc_pmc_idx on app_public_v2.gene_set_pmc (pmc);
-
--- Create a search index on the 'pmc' column to optimize queries.
 create index gene_set_pmc_pmc_search_idx on app_public_v2.gene_set_pmc using btree (pmc);
-
 grant select on app_public_v2.gene_set_pmc to guest;
 grant all privileges on app_public_v2.gene_set_pmc to authenticated;
 
--- Create a view to retrieve distinct PMC values from the materialized view.
 create view app_public_v2.pmc as select distinct pmc from app_public_v2.gene_set_pmc;
 comment on view app_public_v2.pmc is E'@foreignKey (pmc) references app_public_v2.gene_set_pmc (pmc)';
 
 grant select on app_public_v2.pmc to guest;
 grant all privileges on app_public_v2.pmc to authenticated;
 
--- Table to store detailed information about PMCs, including titles and abstracts.
 create table app_public_v2.pmc_info (
   id uuid primary key default uuid_generate_v4(),
   pmc varchar not null unique,
@@ -174,7 +155,6 @@ $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 GRANT EXECUTE ON FUNCTION app_public_v2.terms_pmcs_array TO guest, authenticated;
 
 
--- Function to retrieve PMC information based on specified PMC IDs.
 create or replace function app_public_v2.get_pmc_info_by_ids(pmcids varchar[])
 returns setof app_public_v2.pmc_info as
 $$
@@ -186,8 +166,6 @@ grant execute on function app_public_v2.get_pmc_info_by_ids to guest, authentica
 
 
 -- migrate:down
-
--- Drop the functions
 drop function if exists app_public_v2.get_pmc_info_by_ids(varchar[]) cascade;
 drop function if exists app_public_v2.terms_pmcs_count(varchar[]) cascade;
 drop function if exists app_public_v2.gene_set_gene_search(varchar[]) cascade;
@@ -198,20 +176,15 @@ drop function if exists app_public_v2.gene_set_genes(app_public_v2.gene_set) cas
 drop function if exists app_public_v2.enrich_result_gene_sets(app_public_v2.enrich_result) cascade;
 drop function if exists app_public_v2.terms_pmcs_count2 cascade;
 
--- Drop the views
 drop view if exists app_public_v2.pmc cascade;
 drop materialized view if exists app_public_v2.gene_set_pmc cascade;
 
--- Drop the table pmc_info
 drop table if exists app_public_v2.pmc_info cascade;
 
--- Drop the table user_gene_set
 drop table if exists app_public_v2.user_gene_set cascade;
 
--- Drop the type enrich_result
 drop type if exists app_public_v2.enrich_result cascade;
 
--- Drop the indexes created on the materialized view
 drop index if exists gene_set_pmc_id_pmc_idx;
 drop index if exists gene_set_pmc_pmc_idx;
 drop index if exists gene_set_pmc_pmc_search_idx;

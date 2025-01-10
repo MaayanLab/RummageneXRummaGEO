@@ -1,6 +1,4 @@
 -- migrate:up
-
--- Create gse_info table
 create table app_public_v2.gse_info (
  id uuid primary key default uuid_generate_v4(),
  gse varchar,
@@ -19,7 +17,6 @@ grant all privileges on app_public_v2.gse_info to authenticated;
 comment on table app_public_v2.gse_info is E'@foreignKey (gse) references app_public_v2.gene_set (gse)';
 create index gse_info_gse_idx on app_public_v2.gse_info (gse);
 
--- Create pmid_info table
 create table  app_public_v2.pmid_info (
  id uuid primary key default uuid_generate_v4(),
  pmid varchar not null unique,
@@ -70,24 +67,19 @@ as $$
 $$ language sql immutable strict parallel safe;
 grant execute on function app_public_v2.gene_set_term_search2 to guest, authenticated;
 
--- Create index on gse
 create index gene_set_pmid_gse_idx on app_public_v2.gene_set_pmid (gse);
 create index gene_set_pmid_gse_id__idx on app_public_v2.gene_set_pmid (gse_id);
 
 
--- Grant permissions for gene_set_pmid
 grant select on app_public_v2.gene_set_pmid to guest;
 grant all privileges on app_public_v2.gene_set_pmid to authenticated;
 
--- Create the view pmid
 create view app_public_v2.pmid as select distinct pmid from app_public_v2.gene_set_pmid;
 comment on view app_public_v2.pmid is E'@foreignKey (pmid) references app_public_v2.gene_set_pmid (pmid)';
 
--- Grant permissions for the view
 grant select on app_public_v2.pmid to guest;
 grant all privileges on app_public_v2.pmid to authenticated;
 
--- Create functions to retrieve information by PMIDs
 create function app_public_v2.get_pb_info_by_ids(pmids varchar[])
 returns setof app_public_v2.gene_set_pmid as
 $$
@@ -112,21 +104,17 @@ drop function app_public_v2.get_gse_info_by_ids;
 drop function app_public_v2.get_pb_info_by_ids;
 drop function app_public_v2.get_pb_meta_by_ids;
 
--- Drop indexes created in the up migration
 drop index app_public_v2.gse_info_gse_idx;
 drop index app_public_v2.pmid_info_pmid_idx;
 drop index app_public_v2.gene_set_pmid_gse_idx;
 drop index app_public_v2.gene_set_pmid_gse_id__idx;
 
--- Drop materialized view
 
--- Drop views created in the up migration
 drop view app_public_v2.pmid;
 drop materialized view app_public_v2.gene_set_pmid;
 
 
 
--- Drop tables created in the up migration
 drop table app_public_v2.gse_info;
 drop table app_public_v2.pmid_info;
 
