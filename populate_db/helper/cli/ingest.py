@@ -16,12 +16,15 @@ def import_gene_set_library(
     import re
     import uuid
     with open("data/data_hyp.json" ,"r") as f:
-        gse_sum= json.load(f)
+        hyp= json.load(f)
+    with open("data/data_enrichr2.json" ,"r") as f:
+        enrich = json.load(f)
     # Fetch the gene_set, gather the background genes
     background_genes = set()
     n_geneset_genes = 0
 
-    batch_size = 100000
+    batch_size = 1000
+    # batch_size = 1000
     current_batch = []
 
     with Path(library).open('r') as fr:
@@ -44,13 +47,20 @@ def import_gene_set_library(
             raw_genes = row["overlaps"].split(";")
             odds = float(row["odds"])
             pval = float(row["p-value"])
-            if term in gse_sum:
-                hypothesis = gse_sum[term]
+            if term in hyp:
+                hypothesis = hyp[term]["hypothesis"]
+                title = hyp[term]["title"]
+                part1 = enrich[term]["enrich view"][0][1]
+                part2 = enrich[term]["enrich view"][1][1]
+                part3 = enrich[term]["enrich view"][2][1]
+                userListIdova = enrich[term]["enrich view"][0][0].split("?")[1].split("=")[1]
+                userListIdgene = enrich[term]["enrich view"][1][0].split("?")[1].split("=")[1]
+                userListIdgeo = enrich[term]["enrich view"][2][0].split("?")[1].split("=")[1]
+                enrich_link = f"{part1};{part2};{part3};{userListIdova};{userListIdgeo};{userListIdgene}"
             else:
                 hypothesis = None
-            # print(row)
-            # print(hypothesis)
-            # print(dfljdfdjlfld)
+                title = None
+                enrich_link = {}
 
             genes = [
                 cleaned_gene
@@ -74,6 +84,8 @@ def import_gene_set_library(
                 rummageo_size=rummageo_size,
                 pvalue=pval,
                 hypothesis=hypothesis,
+                hypothesis_title=title,
+                enrich_links=enrich_link,
                 odds=odds
             ))
             background_genes.update(genes)
@@ -81,17 +93,17 @@ def import_gene_set_library(
             row_counter += 1
 
             # Process the current batch if it reaches the defined batch size
-            if len(current_batch) >= batch_size:
-
+            if len(current_batch) == batch_size:
                 process_batch(plpy, current_batch, background_genes)
                 current_batch = []  # Reset current batch after processing
-
+                # print('DONE')
+                # break
+            
                 # print(dfljdfdjlfld)
-
+            
         # Process any remaining records in the last batch
         if current_batch:
             process_batch(plpy, current_batch, background_genes)
-
     # Refresh materialized views
     plpy.execute('refresh materialized view concurrently app_public_v2.gene_set_pmc', [])
     plpy.execute('refresh materialized view concurrently app_public_v2.gene_set_gse', [])
@@ -152,6 +164,8 @@ def process_batch(plpy, batch, background_genes):
             rummagene_size=gene_set["rummagene_size"],
             rummageo_size=gene_set["rummageo_size"],
             hypothesis=gene_set["hypothesis"],
+            hypothesis_title=gene_set["hypothesis_title"],
+            enrich_links=gene_set["enrich_links"],
             odds=gene_set["odds"]
         )
         for gene_set in batch
@@ -160,7 +174,7 @@ def process_batch(plpy, batch, background_genes):
 
     # Insert records for the current batch
     copy_from_records(
-        plpy.conn, 'app_public_v2.gene_set', ('term', 'description', 'hash', 'gene_ids', 'n_gene_ids', 'species', "gse", "pmc", "rummagene_size", "rummageo_size", "pvalue", "hypothesis", "odds"),
+        plpy.conn, 'app_public_v2.gene_set', ('term', 'description', 'hash', 'gene_ids', 'n_gene_ids', 'species', "gse", "pmc", "rummagene_size", "rummageo_size", "pvalue", "hypothesis", "hypothesis_title", "enrich_links","odds"),
         tqdm(records_to_insert, desc='Inserting gene sets...')
     )
 
@@ -178,10 +192,7 @@ def ingest(input, prefix, postfix):
 
   
   try:
-    # import_gene_set_library(plpy, input, prefix=prefix, postfix=postfix, species=species)
-      import_gene_set_library(plpy, input, prefix=prefix, postfix=postfix)
-
-    # write_view_info_to_file()
+    import_gene_set_library(plpy, input, prefix=prefix, postfix=postfix)
   except:
     plpy.conn.rollback()
     raise
