@@ -25,3 +25,6 @@ scipy
 seaborn
 tqdm
 umap-learn
+fpdf2
+pypdf
+dash

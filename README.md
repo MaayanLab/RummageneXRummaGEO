@@ -26,12 +26,13 @@ npm run dev
 
 ### Provisioning
 ```bash
-#Before running the next steps, ensure you have files similar to those in the public folder e.g. the data_hyp.json
+
 #make sure you are using python 3.10 or above
 
 mkdir -p data
 cd data
 curl -O https://s3.dev.maayanlab.cloud/rummageogene/data_hyp.json
+curl -O https://s3.dev.maayanlab.cloud/rummageogene/data_enrichr2.json
 curl -O https://s3.dev.maayanlab.cloud/rummageogene/gse_results.json
 curl -O https://s3.dev.maayanlab.cloud/rummageogene/title_abs.json
 curl -O https://s3.dev.maayanlab.cloud/rummageogene/rummagenexrummageo.csv.gz
@@ -39,8 +40,7 @@ curl -O https://s3.dev.maayanlab.cloud/rummageogene/top_1million.csv
 gunzip rummagenexrummageo.csv.gz
 cd ..
 
-# python3.10 -m venv myvenv
-python -m venv myvenv
+python3 -m venv myvenv
 source myvenv/bin/activate
 pip install -r populate_db/requirements.txt
 

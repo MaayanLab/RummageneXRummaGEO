@@ -4,6 +4,11 @@ mod bitvec;
 
 #[macro_use] extern crate rocket;
 use async_lock::RwLock;
+// use dotenv::dotenv;
+// use std::env;
+// use rocket::figment::Figment;
+// use rocket::Config;
+
 use futures::StreamExt;
 use num::Integer;
 use rocket::http::ContentType;
@@ -28,7 +33,8 @@ use async_rwlockhashmap::RwLockHashMap;
 use bitvec::{SparseBitVec,DenseBitVec,compute_overlap};
 
 /**
- * Without this alternative allocator, very large chunks of memory do not get released back to the OS causing a large memory footprint over time.
+ * 
+ * out this alternative allocator, very large chunks of memory do not get released back to the OS causing a large memory footprint over time.
  */
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -388,3 +394,30 @@ fn rocket() -> _ {
         .attach(Postgres::init())
         .mount("/", routes![ensure, get_gmt, query, delete])
 }
+
+
+
+// #[launch]
+// fn rocket() -> _ {
+//     dotenv().ok();
+
+//     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set in .env or environment");
+
+//     // Configure Rocket to use the database URL
+//     let figment = Figment::from(Config::default())
+//         .merge(("databases", rocket::figment::map! {
+//             "postgres" => rocket::figment::map! {
+//                 "url" => database_url
+//             }
+//         }));
+
+//     rocket::custom(figment)
+//         .manage(PersistentState {
+//             fisher: RwLock::new(FastFisher::new()),
+//             bitmaps: RwLockHashMap::new(),
+//             latest: RwLock::new(None),
+//             cache: Cache::new(),
+//         })
+//         .attach(Postgres::init())
+//         .mount("/", routes![ensure, get_gmt, query, delete])
+// }
