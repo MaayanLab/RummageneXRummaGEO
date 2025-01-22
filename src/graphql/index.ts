@@ -285,6 +285,7 @@ export type GeneSet = Node & {
   __typename?: 'GeneSet';
   created: Scalars['Datetime']['output'];
   description?: Maybe<Scalars['String']['output']>;
+  enrichLinks?: Maybe<Scalars['String']['output']>;
   geneIds: Scalars['JSON']['output'];
   /** Reads and enables pagination through a set of `Gene`. */
   genes: GenesConnection;
@@ -293,6 +294,8 @@ export type GeneSet = Node & {
   gseInfosByGse: GseInfosConnection;
   hash: Scalars['UUID']['output'];
   hypothesis?: Maybe<Scalars['String']['output']>;
+  hypothesisRating?: Maybe<Scalars['Float']['output']>;
+  hypothesisTitle?: Maybe<Scalars['String']['output']>;
   id: Scalars['UUID']['output'];
   nGeneIds: Scalars['Int']['output'];
   /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
@@ -306,6 +309,7 @@ export type GeneSet = Node & {
   pvalue?: Maybe<Scalars['Float']['output']>;
   /** Reads and enables pagination through a set of `RankedGeneSet`. */
   rankedGeneSetsById: RankedGeneSetsConnection;
+  ratingCounts?: Maybe<Scalars['Int']['output']>;
   rummageneSize?: Maybe<Scalars['Int']['output']>;
   rummageoSize?: Maybe<Scalars['Int']['output']>;
   species: Scalars['String']['output'];
@@ -855,6 +859,7 @@ export type Mutation = {
   addUserGeneSet?: Maybe<AddUserGeneSetPayload>;
   incrementCounter?: Maybe<IncrementCounterPayload>;
   updateHypothesis?: Maybe<UpdateHypothesisPayload>;
+  updateRatings?: Maybe<UpdateRatingsPayload>;
 };
 
 
@@ -873,6 +878,12 @@ export type MutationIncrementCounterArgs = {
 /** The root mutation type which contains root level fields which mutate data. */
 export type MutationUpdateHypothesisArgs = {
   input: UpdateHypothesisInput;
+};
+
+
+/** The root mutation type which contains root level fields which mutate data. */
+export type MutationUpdateRatingsArgs = {
+  input: UpdateRatingsInput;
 };
 
 /** An object with a globally unique `ID`. */
@@ -1168,7 +1179,7 @@ export type Query = Node & {
   getGseInfoByIds?: Maybe<GseInfosConnection>;
   /** Reads and enables pagination through a set of `GsmMeta`. */
   getGsmMeta?: Maybe<GsmMetasConnection>;
-  getPaginatedRankedGeneSets2?: Maybe<PaginatedRankedGeneSetsResult>;
+  getPaginatedRankedGeneSets?: Maybe<PaginatedRankedGeneSetsResult>;
   /** Reads and enables pagination through a set of `GeneSetPmid`. */
   getPbInfoByIds?: Maybe<GeneSetPmidsConnection>;
   /** Reads and enables pagination through a set of `PmidInfo`. */
@@ -1461,7 +1472,7 @@ export type QueryGetGsmMetaArgs = {
 
 
 /** The root query type which gives access points into the data universe. */
-export type QueryGetPaginatedRankedGeneSets2Args = {
+export type QueryGetPaginatedRankedGeneSetsArgs = {
   pCaseSensitive?: InputMaybe<Scalars['Boolean']['input']>;
   pLimit: Scalars['Int']['input'];
   pOffset: Scalars['Int']['input'];
@@ -1784,22 +1795,12 @@ export type QueryUserGeneSetsArgs = {
 
 export type RankedGeneSet = {
   __typename?: 'RankedGeneSet';
-  created?: Maybe<Scalars['Datetime']['output']>;
-  description?: Maybe<Scalars['String']['output']>;
-  geneIds?: Maybe<Scalars['JSON']['output']>;
   /** Reads a single `GeneSet` that is related to this `RankedGeneSet`. */
   geneSetById?: Maybe<GeneSet>;
-  gse?: Maybe<Scalars['String']['output']>;
-  hash?: Maybe<Scalars['UUID']['output']>;
   hypothesis?: Maybe<Scalars['String']['output']>;
+  hypothesisTitle?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['UUID']['output']>;
-  nGeneIds?: Maybe<Scalars['Int']['output']>;
-  odds?: Maybe<Scalars['Float']['output']>;
-  pmc?: Maybe<Scalars['String']['output']>;
-  pvalue?: Maybe<Scalars['Float']['output']>;
   rank?: Maybe<Scalars['BigInt']['output']>;
-  rummageneSize?: Maybe<Scalars['Int']['output']>;
-  rummageoSize?: Maybe<Scalars['Int']['output']>;
   species?: Maybe<Scalars['String']['output']>;
   term?: Maybe<Scalars['String']['output']>;
 };
@@ -2014,6 +2015,38 @@ export type UpdateHypothesisPayloadGeneSetEdgeArgs = {
   orderBy?: InputMaybe<Array<GeneSetsOrderBy>>;
 };
 
+/** All input for the `updateRatings` mutation. */
+export type UpdateRatingsInput = {
+  /**
+   * An arbitrary string value with no semantic meaning. Will be included in the
+   * payload verbatim. May be used to track mutations by the client.
+   */
+  clientMutationId?: InputMaybe<Scalars['String']['input']>;
+  pId?: InputMaybe<Scalars['UUID']['input']>;
+  pRating?: InputMaybe<Scalars['Float']['input']>;
+};
+
+/** The output of our `updateRatings` mutation. */
+export type UpdateRatingsPayload = {
+  __typename?: 'UpdateRatingsPayload';
+  /**
+   * The exact same `clientMutationId` that was provided in the mutation input,
+   * unchanged and unused. May be used by a client to track mutations.
+   */
+  clientMutationId?: Maybe<Scalars['String']['output']>;
+  geneSet?: Maybe<GeneSet>;
+  /** An edge for our `GeneSet`. May be used by Relay 1. */
+  geneSetEdge?: Maybe<GeneSetsEdge>;
+  /** Our root query field type. Allows us to run any query from our mutation payload. */
+  query?: Maybe<Query>;
+};
+
+
+/** The output of our `updateRatings` mutation. */
+export type UpdateRatingsPayloadGeneSetEdgeArgs = {
+  orderBy?: InputMaybe<Array<GeneSetsOrderBy>>;
+};
+
 export type UserGeneSet = Node & {
   __typename?: 'UserGeneSet';
   created: Scalars['Datetime']['output'];
@@ -2129,6 +2162,14 @@ export type UpdateHypothesisMutationVariables = Exact<{
 
 export type UpdateHypothesisMutation = { __typename?: 'Mutation', updateHypothesis?: { __typename?: 'UpdateHypothesisPayload', geneSet?: { __typename?: 'GeneSet', id: any, hypothesis?: string | null } | null } | null };
 
+export type UpdateRatingsMutationVariables = Exact<{
+  id: Scalars['UUID']['input'];
+  rating: Scalars['Float']['input'];
+}>;
+
+
+export type UpdateRatingsMutation = { __typename?: 'Mutation', updateRatings?: { __typename?: 'UpdateRatingsPayload', geneSet?: { __typename?: 'GeneSet', id: any, hypothesis?: string | null, hypothesisRating?: number | null } | null } | null };
+
 export type IncrementCounterMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2139,7 +2180,7 @@ export type ViewGeneSetQueryVariables = Exact<{
 }>;
 
 
-export type ViewGeneSetQuery = { __typename?: 'Query', geneSet?: { __typename?: 'GeneSet', hypothesis?: string | null, genes: { __typename?: 'GenesConnection', nodes: Array<{ __typename?: 'Gene', symbol: string, ncbiGeneId?: number | null, description?: string | null, summary?: string | null }> } } | null };
+export type ViewGeneSetQuery = { __typename?: 'Query', geneSet?: { __typename?: 'GeneSet', hypothesis?: string | null, hypothesisTitle?: string | null, enrichLinks?: string | null, hypothesisRating?: number | null, nGeneIds: number, rummageneSize?: number | null, rummageoSize?: number | null, pvalue?: number | null, ratingCounts?: number | null, genes: { __typename?: 'GenesConnection', nodes: Array<{ __typename?: 'Gene', symbol: string, ncbiGeneId?: number | null, description?: string | null, summary?: string | null }> } } | null };
 
 export type ViewGeneSet2QueryVariables = Exact<{
   id: Scalars['UUID']['input'];
@@ -2224,7 +2265,7 @@ export type OverlapQueryQueryVariables = Exact<{
 
 export type OverlapQueryQuery = { __typename?: 'Query', geneSet?: { __typename?: 'GeneSet', overlap: { __typename?: 'GenesConnection', nodes: Array<{ __typename?: 'Gene', symbol: string, ncbiGeneId?: number | null, description?: string | null, summary?: string | null }> } } | null };
 
-export type ViewRankedSets3QueryVariables = Exact<{
+export type ViewRankedSetsQueryVariables = Exact<{
   range: Scalars['Int']['input'];
   start: Scalars['Int']['input'];
   filterTerm?: InputMaybe<Scalars['String']['input']>;
@@ -2233,7 +2274,7 @@ export type ViewRankedSets3QueryVariables = Exact<{
 }>;
 
 
-export type ViewRankedSets3Query = { __typename?: 'Query', getPaginatedRankedGeneSets2?: { __typename?: 'PaginatedRankedGeneSetsResult', totalCount?: number | null, rankedSets?: Array<{ __typename?: 'RankedGeneSet', id?: any | null, term?: string | null, description?: string | null, nGeneIds?: number | null, rank?: any | null, geneSetById?: { __typename?: 'GeneSet', rummageneSize?: number | null, rummageoSize?: number | null, odds?: number | null, pvalue?: number | null, hypothesis?: string | null, genes: { __typename?: 'GenesConnection', nodes: Array<{ __typename?: 'Gene', symbol: string, ncbiGeneId?: number | null, description?: string | null, summary?: string | null }> }, gseInfosByGse: { __typename?: 'GseInfosConnection', nodes: Array<{ __typename?: 'GseInfo', gse?: string | null, id: any, title?: string | null, summary?: string | null, sampleGroups?: any | null }> }, pmcInfoByPmc?: { __typename?: 'PmcInfo', abstract?: string | null, id: any, title?: string | null, pmc: string } | null } | null } | null> | null } | null };
+export type ViewRankedSetsQuery = { __typename?: 'Query', getPaginatedRankedGeneSets?: { __typename?: 'PaginatedRankedGeneSetsResult', totalCount?: number | null, rankedSets?: Array<{ __typename?: 'RankedGeneSet', id?: any | null, rank?: any | null, geneSetById?: { __typename?: 'GeneSet', term: string, description?: string | null, nGeneIds: number, rummageneSize?: number | null, rummageoSize?: number | null, odds?: number | null, pvalue?: number | null, hypothesis?: string | null, hypothesisTitle?: string | null, genes: { __typename?: 'GenesConnection', nodes: Array<{ __typename?: 'Gene', symbol: string, ncbiGeneId?: number | null, description?: string | null, summary?: string | null }> }, gseInfosByGse: { __typename?: 'GseInfosConnection', nodes: Array<{ __typename?: 'GseInfo', gse?: string | null, id: any, title?: string | null, summary?: string | null, sampleGroups?: any | null }> }, pmcInfoByPmc?: { __typename?: 'PmcInfo', abstract?: string | null, id: any, title?: string | null, pmc: string } | null } | null } | null> | null } | null };
 
 export type QueryPmCSummaryQueryVariables = Exact<{
   id: Scalars['UUID']['input'];
@@ -2648,6 +2689,44 @@ export function useUpdateHypothesisMutation(baseOptions?: Apollo.MutationHookOpt
 export type UpdateHypothesisMutationHookResult = ReturnType<typeof useUpdateHypothesisMutation>;
 export type UpdateHypothesisMutationResult = Apollo.MutationResult<UpdateHypothesisMutation>;
 export type UpdateHypothesisMutationOptions = Apollo.BaseMutationOptions<UpdateHypothesisMutation, UpdateHypothesisMutationVariables>;
+export const UpdateRatingsDocument = gql`
+    mutation UpdateRatings($id: UUID!, $rating: Float!) {
+  updateRatings(input: {pId: $id, pRating: $rating}) {
+    geneSet {
+      id
+      hypothesis
+      hypothesisRating
+    }
+  }
+}
+    `;
+export type UpdateRatingsMutationFn = Apollo.MutationFunction<UpdateRatingsMutation, UpdateRatingsMutationVariables>;
+
+/**
+ * __useUpdateRatingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateRatingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateRatingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateRatingsMutation, { data, loading, error }] = useUpdateRatingsMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      rating: // value for 'rating'
+ *   },
+ * });
+ */
+export function useUpdateRatingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateRatingsMutation, UpdateRatingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateRatingsMutation, UpdateRatingsMutationVariables>(UpdateRatingsDocument, options);
+      }
+export type UpdateRatingsMutationHookResult = ReturnType<typeof useUpdateRatingsMutation>;
+export type UpdateRatingsMutationResult = Apollo.MutationResult<UpdateRatingsMutation>;
+export type UpdateRatingsMutationOptions = Apollo.BaseMutationOptions<UpdateRatingsMutation, UpdateRatingsMutationVariables>;
 export const IncrementCounterDocument = gql`
     mutation IncrementCounter {
   incrementCounter(input: {}) {
@@ -2692,6 +2771,14 @@ export const ViewGeneSetDocument = gql`
       }
     }
     hypothesis
+    hypothesisTitle
+    enrichLinks
+    hypothesisRating
+    nGeneIds
+    rummageneSize
+    rummageoSize
+    pvalue
+    ratingCounts
   }
 }
     `;
@@ -3228,9 +3315,9 @@ export function useOverlapQueryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
 export type OverlapQueryQueryHookResult = ReturnType<typeof useOverlapQueryQuery>;
 export type OverlapQueryLazyQueryHookResult = ReturnType<typeof useOverlapQueryLazyQuery>;
 export type OverlapQueryQueryResult = Apollo.QueryResult<OverlapQueryQuery, OverlapQueryQueryVariables>;
-export const ViewRankedSets3Document = gql`
-    query ViewRankedSets3($range: Int!, $start: Int!, $filterTerm: String, $case: Boolean, $species: String) {
-  getPaginatedRankedGeneSets2(
+export const ViewRankedSetsDocument = gql`
+    query ViewRankedSets($range: Int!, $start: Int!, $filterTerm: String, $case: Boolean, $species: String) {
+  getPaginatedRankedGeneSets(
     pLimit: $range
     pOffset: $start
     pTerm: $filterTerm
@@ -3239,11 +3326,11 @@ export const ViewRankedSets3Document = gql`
   ) {
     rankedSets {
       id
-      term
-      description
-      nGeneIds
       rank
       geneSetById {
+        term
+        description
+        nGeneIds
         genes {
           nodes {
             symbol
@@ -3272,6 +3359,7 @@ export const ViewRankedSets3Document = gql`
         odds
         pvalue
         hypothesis
+        hypothesisTitle
       }
     }
     totalCount
@@ -3280,16 +3368,16 @@ export const ViewRankedSets3Document = gql`
     `;
 
 /**
- * __useViewRankedSets3Query__
+ * __useViewRankedSetsQuery__
  *
- * To run a query within a React component, call `useViewRankedSets3Query` and pass it any options that fit your needs.
- * When your component renders, `useViewRankedSets3Query` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useViewRankedSetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useViewRankedSetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useViewRankedSets3Query({
+ * const { data, loading, error } = useViewRankedSetsQuery({
  *   variables: {
  *      range: // value for 'range'
  *      start: // value for 'start'
@@ -3299,17 +3387,17 @@ export const ViewRankedSets3Document = gql`
  *   },
  * });
  */
-export function useViewRankedSets3Query(baseOptions: Apollo.QueryHookOptions<ViewRankedSets3Query, ViewRankedSets3QueryVariables>) {
+export function useViewRankedSetsQuery(baseOptions: Apollo.QueryHookOptions<ViewRankedSetsQuery, ViewRankedSetsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ViewRankedSets3Query, ViewRankedSets3QueryVariables>(ViewRankedSets3Document, options);
+        return Apollo.useQuery<ViewRankedSetsQuery, ViewRankedSetsQueryVariables>(ViewRankedSetsDocument, options);
       }
-export function useViewRankedSets3LazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ViewRankedSets3Query, ViewRankedSets3QueryVariables>) {
+export function useViewRankedSetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ViewRankedSetsQuery, ViewRankedSetsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ViewRankedSets3Query, ViewRankedSets3QueryVariables>(ViewRankedSets3Document, options);
+          return Apollo.useLazyQuery<ViewRankedSetsQuery, ViewRankedSetsQueryVariables>(ViewRankedSetsDocument, options);
         }
-export type ViewRankedSets3QueryHookResult = ReturnType<typeof useViewRankedSets3Query>;
-export type ViewRankedSets3LazyQueryHookResult = ReturnType<typeof useViewRankedSets3LazyQuery>;
-export type ViewRankedSets3QueryResult = Apollo.QueryResult<ViewRankedSets3Query, ViewRankedSets3QueryVariables>;
+export type ViewRankedSetsQueryHookResult = ReturnType<typeof useViewRankedSetsQuery>;
+export type ViewRankedSetsLazyQueryHookResult = ReturnType<typeof useViewRankedSetsLazyQuery>;
+export type ViewRankedSetsQueryResult = Apollo.QueryResult<ViewRankedSetsQuery, ViewRankedSetsQueryVariables>;
 export const QueryPmCSummaryDocument = gql`
     query QueryPmCSummary($id: UUID!) {
   pmcInfo(id: $id) {

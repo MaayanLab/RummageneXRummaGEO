@@ -50,8 +50,9 @@ create index gene_set_gse_idx on app_public_v2.gene_set (gse);
 create index gene_set_pmc_idx on app_public_v2.gene_set (pmc);                       
 create index idx_gene_set_pvalue_odds on app_public_v2.gene_set (pvalue asc, odds desc);
 
-grant select on table app_public_v2.gene_set to guest;                             
+grant select, update (hypothesis_rating, rating_counts) ON app_public_v2.gene_set TO guest;
 grant all privileges on table app_public_v2.gene_set to authenticated;              
+
 
 
 
@@ -151,6 +152,8 @@ end;
 $$ language plpgsql;
 grant execute on function app_public_v2.update_hypothesis to guest, authenticated;
 
+
+
 create or replace function app_public_v2.update_ratings(
     p_id uuid,
     p_rating double precision
@@ -159,6 +162,7 @@ declare
     current_rating double precision;
     current_count int;
     new_rating double precision;
+    updated_row app_public_v2.gene_set;
 begin
     select hypothesis_rating, rating_counts
     into current_rating, current_count
@@ -168,15 +172,20 @@ begin
     if not found then
         raise exception 'Gene set with ID % not found', p_id;
     end if;
+
     new_rating := ((current_rating * current_count) + p_rating) / (current_count + 1);
+
     update app_public_v2.gene_set
     set
         hypothesis_rating = new_rating,
         rating_counts = rating_counts + 1
     where id = p_id;
-    return (
-        select * from app_public_v2.gene_set where id = p_id
-    );
+
+    select * into updated_row
+    from app_public_v2.gene_set
+    where id = p_id;
+
+    return updated_row;
 end;
 $$ language plpgsql;
 

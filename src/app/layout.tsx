@@ -1,3 +1,4 @@
+// 
 import './globals.css'
 import React from 'react'
 import type { Metadata } from 'next'
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'RummagenexRummaGEO',
+    // description: 'Find published gene sets from supporting tables of PubMed Central (PMC) articles',
     description: 'Find gene sets from crossing Rummagene with RummaGEO',
     url: 'https://rummagenexrummageo.com',
     siteName: 'RummagenexRummaGEO',

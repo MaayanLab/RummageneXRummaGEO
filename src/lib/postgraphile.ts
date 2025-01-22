@@ -1,10 +1,7 @@
 import { postgraphile } from 'postgraphile'
-// import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 
-// const AUTHORIZATION_HEADER = process.env.NEXT_PUBLIC_AUTHORIZATION_HEADER || `Token ${uuidv4()}`
-const AUTHORIZATION_HEADER = process.env.NEXT_PUBLIC_AUTHORIZATION_HEADER || `Token lala`
-
-
+const AUTHORIZATION_HEADER = process.env.AUTHORIZATION_HEADER || `Token ${uuidv4()}`
 
 export default postgraphile(
   process.env.DATABASE_URL,
@@ -30,12 +27,13 @@ export default postgraphile(
       return process.env.NODE_ENV !== 'production'
     },
     pgSettings(req) {
+      // console.log('Authorization Header:', req.headers.authorization);
+
       const role = req.headers.authorization === AUTHORIZATION_HEADER ? 'authenticated' : 'guest'
       return {
-        ...JSON.parse(process.env.NEXT_PUBLIC_PG_SETTINGS || '{}'),
+        ...JSON.parse(process.env.PG_SETTINGS || '{}'),
         role,
       }
     }
   }
 )
-

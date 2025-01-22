@@ -158,6 +158,16 @@ mutation UpdateHypothesis($id: UUID!, $hypothesis: String!) {
   }
 }
 
+mutation UpdateRatings($id: UUID!, $rating: Float!) {
+  updateRatings(input: {pId: $id, pRating : $rating}) {
+    geneSet {
+      id 
+      hypothesis
+      hypothesisRating
+    }
+  }
+}
+
 
 mutation IncrementCounter{
   incrementCounter(input: {}) {
@@ -179,6 +189,14 @@ query ViewGeneSet($id: UUID!) {
       }
     }
     hypothesis
+    hypothesisTitle
+    enrichLinks
+    hypothesisRating
+    nGeneIds
+    rummageneSize
+    rummageoSize
+    pvalue
+    ratingCounts
   }
 }
 
@@ -350,15 +368,16 @@ query OverlapQuery($id: UUID!, $genes: [String]!) {
   }
 }
 
-query ViewRankedSets3($range: Int!, $start: Int!, $filterTerm: String, $case: Boolean, $species: String){
-  getPaginatedRankedGeneSets2(pLimit: $range, pOffset: $start, pTerm: $filterTerm, pCaseSensitive: $case, pSpecies: $species){
+query ViewRankedSets($range: Int!, $start: Int!, $filterTerm: String, $case: Boolean, $species: String){
+  getPaginatedRankedGeneSets(pLimit: $range, pOffset: $start, pTerm: $filterTerm, pCaseSensitive: $case, pSpecies: $species){
     rankedSets{
       id
+      rank
+      geneSetById {
       term
       description
       nGeneIds
-      rank
-      geneSetById {
+      
         genes {
           nodes {
             symbol
@@ -388,6 +407,7 @@ query ViewRankedSets3($range: Int!, $start: Int!, $filterTerm: String, $case: Bo
         odds
         pvalue
         hypothesis
+        hypothesisTitle
       }
     }
     totalCount

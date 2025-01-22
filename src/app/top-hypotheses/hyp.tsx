@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import {
-  useViewRankedSets3Query, 
+  useViewRankedSetsQuery, 
 } from '@/graphql'
 import Loading2 from '@/components/loading2'
 import Pagination from '@/components/pagination'
@@ -16,13 +16,11 @@ type GeneSetModalT =  {
   description: string,
   genes: string[],
 } | {
-  type: 'GeneSetOverlap2',
+  type: 'GeneSetHypothesis',
   id: UUID,
   genes: string[]
   rummagene: string,
   rummageo: string,
-  description: string,
-
 } | undefined
 
 
@@ -60,11 +58,11 @@ export default function HypothesisResults({ setModalGeneSet, setModalHypothesis,
     const { page, term, species } = React.useMemo(() => ({
       page: queryString.page ? +queryString.page : 1,
       term: queryString.q ?? '',
-      species: queryString.species ?? '', // Default species
+      species: queryString.species ?? '', 
     }), [queryString]);
   
 
-    const { data: hypResults, loading, error } = useViewRankedSets3Query({
+    const { data: hypResults, loading, error } = useViewRankedSetsQuery({
       variables: { range: pageSize, start: (page - 1) * pageSize, filterTerm:term, case: false, species: species},
     });
 
@@ -86,9 +84,9 @@ export default function HypothesisResults({ setModalGeneSet, setModalHypothesis,
         document.body.appendChild(a);
         a.click();
         a.remove();
-        window.URL.revokeObjectURL(url); // Clean up the URL.createObjectURL
+        window.URL.revokeObjectURL(url); 
       }
-      setDownloading(false); // End loading
+      setDownloading(false); 
     };
 
     
@@ -111,12 +109,11 @@ export default function HypothesisResults({ setModalGeneSet, setModalHypothesis,
       
     if (error) return <div>Error loading data: {error.message}</div>;
    
-    const totalCount = hypResults?.getPaginatedRankedGeneSets2?.totalCount || 0;
-
-    // console.log(totalCount)
+    const totalCount = hypResults?.getPaginatedRankedGeneSets?.totalCount || 0;
 
 
-  const currentGeneSets = hypResults?.getPaginatedRankedGeneSets2?.rankedSets ?? [];
+
+  const currentGeneSets = hypResults?.getPaginatedRankedGeneSets?.rankedSets ?? [];
 
 
 
@@ -191,7 +188,6 @@ export default function HypothesisResults({ setModalGeneSet, setModalHypothesis,
           <thead>
             <tr>
               <th>Index</th>
-              {/* <th>Rank</th> */}
               <th>Sources</th>
               <th>Titles</th>
               <th>Details</th>
@@ -202,12 +198,11 @@ export default function HypothesisResults({ setModalGeneSet, setModalHypothesis,
             </tr>
           </thead>
           <tbody>
-          {/* Map over currentGeneSets for the current page */}
           {currentGeneSets.map((geneSet, index) => {
             if (!geneSet || !geneSet.geneSetById) {
               return null; // or return a placeholder if desired
             }
-               const term =`${geneSet.term}`;
+               const term =`${geneSet.geneSetById.term}`;
                const [rummagene, rummageo] = term.split(";");
                const [paper, _ , termid] = partition(rummagene, '-');
                const [gse, cond1, ra, cond2, dir] = (rummageo ?? '').split("-");
@@ -218,7 +213,7 @@ export default function HypothesisResults({ setModalGeneSet, setModalHypothesis,
                const cond2Title = `${geneSet?.geneSetById?.gseInfosByGse.nodes[0].sampleGroups?.titles[cond2]}`;
                const title = `${geneSet?.geneSetById?.pmcInfoByPmc?.title}`;
                const pmcid = geneSet.geneSetById?.pmcInfoByPmc?.pmc;
-               const description =`${geneSet?.description}`;
+               const description =`${geneSet?.geneSetById.description}`;
                const odds= geneSet?.geneSetById?.odds as number;
                const pval = geneSet?.geneSetById?.pvalue === 0 ? '<1e-324' : geneSet?.geneSetById?.pvalue ?? 0;
                const rummagene_S = `${geneSet?.geneSetById?.rummageneSize}`;
@@ -303,12 +298,12 @@ export default function HypothesisResults({ setModalGeneSet, setModalHypothesis,
                             setModalGeneSet({
                               type: "GeneSet",
                               id: geneSet.id,
-                              description: geneSet.term ?? "",
+                              description: geneSet.geneSetById?.term ?? "",
                               genes: gen
                             });
                           }}
                         >
-                          {geneSet.nGeneIds}
+                          {geneSet.geneSetById.nGeneIds}
                         </label>
                       </div>
                     </td>
@@ -319,11 +314,10 @@ export default function HypothesisResults({ setModalGeneSet, setModalHypothesis,
                           className="btn btn-sm"
                           onClick={() => {
                             setModalHypothesis({
-                              type: "GeneSetOverlap2",
+                              type: "GeneSetHypothesis",
                               id: set_id,
                               rummagene: `${rummagene}`,
                               rummageo: `${rummageo}`,
-                              description: `${description}`,
                               genes: gen,
                             });
                           }}
@@ -335,7 +329,6 @@ export default function HypothesisResults({ setModalGeneSet, setModalHypothesis,
                   </tr>
               
                   {/* Second part of the same row */}
-                  {/* <tr key={`${index}-geo`} className={`${index % 2 === 0 ? 'bg-gray-100' : ''}`}> */}
                   <tr key={`${index}-geo`} className={`${index % 2 === 0 ? 'bg-gray-100' : ''} border-t-4 border-b-4 border-gray-800 dark:border-white`}>
 
                     <th rowSpan={1}>

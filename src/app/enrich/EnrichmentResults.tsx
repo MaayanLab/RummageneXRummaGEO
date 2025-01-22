@@ -151,10 +151,10 @@ export default function EnrichmentResults({ userGeneSet, setModalGeneSet,   setM
   <button
     type="button"
     className="btn join-item font-bold text-2xl pb-1"
-    onClick={handleDownload} // Add onClick for downloading
-    disabled={downloading} // Disable button while downloading
+    onClick={handleDownload} 
+    disabled={downloading} 
   >
-    {!downloading ? <>&#x21E9;</> : null} {/* Show download icon when not loading */}
+    {!downloading ? <>&#x21E9;</> : null} 
   </button>
 </div>
       </form>

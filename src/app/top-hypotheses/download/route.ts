@@ -1,4 +1,4 @@
-import { ViewRankedSets3Document, ViewRankedSets3Query } from "@/graphql"
+import { ViewRankedSetsDocument, ViewRankedSetsQuery } from "@/graphql"
 import { getClient } from "@/lib/apollo/client"
 import partition from "@/utils/partition"
 import streamTsv from "@/utils/streamTsv"
@@ -17,8 +17,8 @@ export async function GET(request: Request) {
   const term = searchParams.get('q') || ''
 
 
-  const { data: rankedResults, error: rankedResultsError } = await getClient().query<ViewRankedSets3Query>({
-    query: ViewRankedSets3Document,
+  const { data: rankedResults, error: rankedResultsError } = await getClient().query<ViewRankedSetsQuery>({
+    query: ViewRankedSetsDocument,
     variables: { range:1000, start: 0, filterTerm: term, case: false, species: dataset },
   });
 
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   }
 
 
-  const nodes = rankedResults.getPaginatedRankedGeneSets2?.rankedSets;
+  const nodes = rankedResults.getPaginatedRankedGeneSets?.rankedSets;
 
   if (!nodes) {
     throw new Error('No results');
@@ -47,21 +47,21 @@ export async function GET(request: Request) {
         const renderedGeneSets = new Set();
         const renderedGeneSets1 = new Set();
     
-        if (renderedGeneSets.has(node?.term)) {
+        if (renderedGeneSets.has(node?.geneSetById?.term)) {
           return null; // Skip this gene set if it's a duplicate
         }
     
-        renderedGeneSets.add(node?.term);
+        renderedGeneSets.add(node?.geneSetById?.term);
         const item = {
-          geneSetHash: node?.term,  // Use node.term as hash
+          geneSetHash: node?.geneSetById?.term,  // Use node.term as hash
           pvalue: node?.geneSetById?.pvalue,
-          nOverlap: node?.nGeneIds,
+          nOverlap: node?.geneSetById?.nGeneIds,
           oddsRatio: node?.geneSetById?.odds,
           rummageoSize: node?.geneSetById?.rummageoSize,
           rummageneSize: node?.geneSetById?.rummageneSize,
           gseInfos: node?.geneSetById?.gseInfosByGse?.nodes?.[0],
           pmcInfo: node?.geneSetById?.pmcInfoByPmc,
-          description: node?.description,
+          description: node?.geneSetById?.description,
           hypothesis: node?.geneSetById?.hypothesis
         };
     
@@ -72,9 +72,9 @@ export async function GET(request: Request) {
           item.nOverlap !== undefined &&
           !renderedGeneSets1.has(item?.geneSetHash)
         ) {
-          renderedGeneSets1.add(node?.term);
+          renderedGeneSets1.add(node?.geneSetById?.term);
     
-          const term = node?.term;
+          const term = node?.geneSetById?.term;
           const [rummagene, rummageo] = term?.split(";") ?? ['', ''];
           const [paper, _, termid] = partition(rummagene, '-');
           const [gse, cond1, ra, cond2, dir] = (rummageo ?? '').split("-");
@@ -86,12 +86,12 @@ export async function GET(request: Request) {
           if (
             rummagene &&
             item.pmcInfo?.title &&
-            node?.description &&
+            node?.geneSetById?.term &&
             rummageo &&
             geoTitle &&
             condition_1 &&
             condition_2 &&
-            node?.nGeneIds !== undefined &&
+            node?.geneSetById?.nGeneIds !== undefined &&
             item.nOverlap !== undefined &&
             item.oddsRatio !== undefined &&
             item.pvalue !== undefined 

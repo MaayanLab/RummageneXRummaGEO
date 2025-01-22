@@ -5,7 +5,7 @@ import {
 } from '@/graphql'
 import GeneSetModal from '@/components/geneSetModal'
 import HypothesisResults from './hyp'
-import HypothesisModal from '@/components/hypothesisModal3'
+import HypothesisModal from '@/components/hypothesisModal'
 import { UUID } from 'crypto'
 import SamplesModal from '@/components/samplesModal'
 
@@ -33,12 +33,11 @@ type GeneSetModalT =  {
   description: string,
   genes: string[],
 } | {
-  type: 'GeneSetOverlap2',
+  type: 'GeneSetHypothesis',
   id: UUID,
   genes: string[]
   rummagene: string,
   rummageo: string,
-  description: string,
 
 } | undefined
 
@@ -50,8 +49,7 @@ function HypothesisModalWrapper(props: {
 }) {
   
 
-  // Conditionally render the modal only if modalGeneSet is of type "GeneSetOverlap2"
-  if (props.modalGeneSet?.type === "GeneSetOverlap2") {
+  if (props.modalGeneSet?.type === "GeneSetHypothesis") {
     return (
       <HypothesisModal
         showModal={true}
@@ -59,7 +57,6 @@ function HypothesisModalWrapper(props: {
         geneset={props.modalGeneSet.genes}
         rummagene={props.modalGeneSet.rummagene}
         rummageo={props.modalGeneSet.rummageo}
-        description={props.modalGeneSet.description}
         set_id={props.modalGeneSet.id}
         setShowModal={(show) => {
           if (!show) props.setModalGeneSet(undefined);
@@ -86,7 +83,7 @@ function GeneSetModalWrapper(props: { modalGeneSet: GeneSetModalT, setModalGeneS
   return (
     <GeneSetModal
       showModal={props.modalGeneSet !== undefined}
-      term={props.modalGeneSet?.description}
+      term={ props.modalGeneSet?.type === 'GeneSet' ? props.modalGeneSet?.description : undefined}
       geneset={
         props.modalGeneSet?.type === 'GeneSet' ? geneSet?.geneSet?.genes.nodes
         : undefined

@@ -1,3 +1,6 @@
+### RummageneXRummaGEO
+This resource can be accessed at https://rummageogene.maayanlab.cloud. 
+
 ### Development
 Rather than splitting up the meta and data APIs, all functionality is incorporated into a postgres database.
 
@@ -46,11 +49,11 @@ pip install -r populate_db/requirements.txt
 
 #You can also run populate.sh for the following commands
 PYTHONPATH=populate_db python3 -m helper ingest -i data/top_1million.csv
-PYTHONPATH=populate_db python3 -m helper ingest-paper-info
 PYTHONPATH=populate_db python3 -m helper ingest-gene-info
+PYTHONPATH=populate_db python3 -m helper update-background
+PYTHONPATH=populate_db python3 -m helper ingest-paper-info
 PYTHONPATH=populate_db python3 -m helper ingest-gse-info --species human
 PYTHONPATH=populate_db python3 -m helper ingest-gse-info --species mouse
-PYTHONPATH=populate_db python3 -m helper update-background
 
 
 ```

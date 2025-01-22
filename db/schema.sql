@@ -790,6 +790,7 @@ declare
     current_rating double precision;
     current_count int;
     new_rating double precision;
+    updated_row app_public_v2.gene_set;
 begin
     select hypothesis_rating, rating_counts
     into current_rating, current_count
@@ -799,15 +800,20 @@ begin
     if not found then
         raise exception 'Gene set with ID % not found', p_id;
     end if;
+
     new_rating := ((current_rating * current_count) + p_rating) / (current_count + 1);
+
     update app_public_v2.gene_set
     set
         hypothesis_rating = new_rating,
         rating_counts = rating_counts + 1
     where id = p_id;
-    return (
-        select * from app_public_v2.gene_set where id = p_id
-    );
+
+    select * into updated_row
+    from app_public_v2.gene_set
+    where id = p_id;
+
+    return updated_row;
 end;
 $$;
 

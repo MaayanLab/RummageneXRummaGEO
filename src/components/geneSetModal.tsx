@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import classNames from 'classnames'
 import blobTsv from '@/utils/blobTsv'
 import clientDownloadBlob from '@/utils/clientDownloadBlob'
+import RummageoButton from './rummageoButton'
+import RummageneButton from './rummageneButton'
 
 function ExpandableText({ text }: { text: string }) {
     const [more, setMore] = React.useState(false)
@@ -96,6 +98,9 @@ export default function GeneSetModal({ geneset, term, showModal, setShowModal }:
                             Copy Symbols to Clipboard
                         </button>
                         <EnrichrButton genes={genes} description={term}></EnrichrButton>
+                        <RummageoButton genes={genes} description={term}></RummageoButton>
+                        <RummageneButton genes={genes} description={term}></RummageneButton>
+
                         <button
                             className="btn btn-sm btn-outline text-xs"
                             type="button"

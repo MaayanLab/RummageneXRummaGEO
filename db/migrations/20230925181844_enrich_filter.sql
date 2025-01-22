@@ -59,26 +59,6 @@ $$ language sql immutable parallel safe security definer;
 grant execute on function app_public_v2.background_enrich to guest, authenticated;
 
 -- migrate:down
-drop function if exists app_public_v2.background_enrich(
-  background app_public_v2.background,
-  genes varchar[],
-  filter_term varchar,
-  overlap_ge int,
-  pvalue_le double precision,
-  adj_pvalue_le double precision,
-  "offset" int,
-  "first" int
-) cascade;
-
-drop function if exists app_private_v2.indexed_enrich(
-  background app_public_v2.background,
-  gene_ids uuid[],
-  filter_term varchar,
-  overlap_ge int,
-  pvalue_le double precision,
-  adj_pvalue_le double precision,
-  "offset" int,
-  "first" int
-) cascade;
-
-drop type if exists app_public_v2.paginated_enrich_result cascade;
+drop function app_public_v2.background_enrich;
+drop function app_private_v2.indexed_enrich;
+drop type app_public_v2.paginated_enrich_result;

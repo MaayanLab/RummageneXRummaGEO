@@ -20,10 +20,6 @@ export default function InputForm() {
            sortedGenes.every((gene, i) => gene === sortedExampleGenes[i]);
   }, [genes]);
 
-  // const description = React.useMemo(
-  //   () => `Description: ${desc} | Genes: ${genes.join(', ')}`,
-  //   [genes, desc]
-  // )
   const description = React.useMemo(() => desc, [desc]);
 
   const [addUserGeneSetMutation, { loading, error }] = useAddUserGeneSetMutation()

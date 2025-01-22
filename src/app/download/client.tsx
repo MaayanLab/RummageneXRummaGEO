@@ -8,7 +8,7 @@ const downloads = [
     filename: 'rummagenexrummageo.csv.gz',
     title: 'rummagenexrummageo.csv.gz',
     value: '13,419,202 gene sets', 
-    size: <><span className="whitespace-nowrap">Approx 3.56GB</span></>,
+    size: <><span className="whitespace-nowrap">Approx 6.1GB</span></>,
     updated: new Date("Sun Oct 20 2024"), 
     description: "Contains gmt information along with extra details such as odds ratio and p values"
   },
@@ -17,7 +17,7 @@ const downloads = [
     filename: 'hypotheses.json',
     title: 'hypotheses.json',
     value: 'top 1,000 hypotheses', 
-    size: <><span className="whitespace-nowrap">Approx 3.4MB</span></>,
+    size: <><span className="whitespace-nowrap">Approx 3.0MB</span></>,
     updated: new Date("Sun Oct 20 2024"), 
     description: ""
   },
@@ -26,7 +26,7 @@ const downloads = [
     filename: 'gse_info.json',
     title: 'gse_info.json',
     value: 'rummageo metadata', 
-    size: <><span className="whitespace-nowrap">Approx 97.4MB</span></>,
+    size: <><span className="whitespace-nowrap">Approx 105MB</span></>,
     updated: new Date("Sun Oct 20 2024"), 
     description: ""
   },
@@ -35,7 +35,7 @@ const downloads = [
     filename: 'pmc_info.json',
     title: 'pmc_info.json',
     value: 'rummagene metadata', 
-    size: <><span className="whitespace-nowrap">Approx 43.9MB</span></>,
+    size: <><span className="whitespace-nowrap">Approx 228.9MB</span></>,
     updated: new Date("Sun Oct 20 2024"), 
     description: ""
   },
@@ -44,7 +44,7 @@ const downloads = [
     filename: 'top_1million.csv',
     title: 'top_1million.csv',
     value: '1,000,000 gene sets', 
-    size: <><span className="whitespace-nowrap">Approx 2.19GB</span></>,
+    size: <><span className="whitespace-nowrap">Approx 3GB</span></>,
     updated: new Date("Sun Oct 20 2024"), 
     description: ""
   },
