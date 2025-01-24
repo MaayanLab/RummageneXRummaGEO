@@ -20,5 +20,7 @@ curl -O https://s3.amazonaws.com/maayanlab-public/rummageo/mouse-geo-auto.gmt.gz
 cd ..
 jupyter nbconvert --to notebook --inplace --execute rummageogene.ipynb #to create rummagenexrummageo.csv.gz
 jupyter nbconvert --to notebook --inplace --execute cleaning_up_csv.ipynb # to remove cases where the rummagene and rummageo share pmids
+jupyter nbconvert --to notebook --inplace --execute hypothesis_generation.ipynb # to remove cases where the rummagene and rummageo share pmids
+
 ```
 Keep in mind that the crossing can happen over the course of a week but you can edit the number of batches etc. that run at a time.
