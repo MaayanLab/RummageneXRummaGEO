@@ -19,7 +19,7 @@ export function toReadable(stream: Readable | ReadableStream<Uint8Array>) {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const backendReq = await fetch(`${process.env.NEXT_PUBLIC_ENRICH_URL || 'http://127.0.0.1:8000'}/latest/gmt`)
+  const backendReq = await fetch(`${process.env.ENRICH_URL || 'http://127.0.0.1:8000'}/latest/gmt`)
   if (backendReq.ok && backendReq.body) {
     res.status(200)
     toReadable(backendReq.body).pipe(res)
