@@ -1,41 +1,50 @@
 services:
-  rummagenexrummageo-app:
+  rummageogene-app:
     build: .
     platform: linux/amd64
-    image: maayanlab/rummageogene
+    image: maayanlab/rummageogene:0.2.0
+    x-kubernetes:
+      annotations:
+        maayanlab.cloud/ingress: https://rummageogene.k8s.maayanlab.cloud
     environment:
-      - PUBLIC_URL=$PUBLIC_URL
-      - DATABASE_URL=postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@rummagenexrummageo-postgres/$POSTGRES_DB
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@rummageogene-postgres/${POSTGRES_DB}
       - AUTHORIZATION_HEADER=$AUTHORIZATION_HEADER
       - NODE_ENV=production
-      - ENRICH_URL=$ENRICH_URL
       - NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
+      - ENRICH_URL=http://rummageogene-enrich:8000
+      - NEXT_PUBLIC_URL=https://rummageogene.k8s.maayanlab.cloud
     ports:
       - 3000:3000
 
-  rummagenexrummageo-enrich:
+  rummageogene-enrich:
     build: enrich
     platform: linux/amd64
-    # image: maayanlab/rummageogene-enrich
+    image: maayanlab/rummageogene-enrich:0.2.0
     environment:
-      - 'ROCKET_DATABASES={postgres={url="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@rummagenexrummageo-postgres/${POSTGRES_DB}"}}'
+      - 'ROCKET_DATABASES={postgres={url="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@rummageogene-postgres/${POSTGRES_DB}"}}'
     ports:
       - 8000:8000
 
-  rummagenexrummageo-postgres:
+  rummageogene-postgres:
     build: db
     platform: linux/amd64
-    image: maayanlab/rummageogene-db
+    image: maayanlab/rummageogene-db:0.2.0
     environment:
       - POSTGRES_DB
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-      - ENRICH_URL=$ENRICH_URL
+      - ENRICH_URL=http://rummageogene-enrich:8000
     ports:
       - 5432:5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      
+      - rummageogene-postgres:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  rummageogene-postgres:
+    x-kubernetes:
+      class: ceph-block
+      size: 24G
+
+x-kubernetes:
+  name: rummageogene
+  namespace: rummageogene
